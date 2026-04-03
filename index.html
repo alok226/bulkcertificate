@@ -308,30 +308,29 @@
             .cert-seal-center { order: -1; margin-bottom: 10px; height: 110px; }
         }
 
-        /* === STRICT A4 PRINTING LOGIC === */
-        @page marksheet-page { size: A4 portrait; margin: 0; }
-        @page cert-page { size: A4 landscape; margin: 0; }
+        /* === STRICT A4 PRINTING LOGIC (SAFE BOUNDING BOXES) === */
+        @page marksheet-page { size: A4 portrait; margin: 10mm; }
+        @page cert-page { size: A4 landscape; margin: 10mm; }
         
         @media print {
-            /* Reset body entirely for print */
             body, html { background: none !important; margin: 0 !important; padding: 0 !important; width: 100% !important; height: 100% !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .no-print, .bg-shape { display: none !important; }
             .container { max-width: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
             
             #printZone { width: 100%; margin: 0; padding: 0;}
             
-            /* Logic for Single Prints */
+            /* Print Visibility Control */
             body.print-marksheet .marksheet-wrapper { display: block !important; }
             body.print-marksheet #certificateDoc, body.print-marksheet #bulkPrintZone { display: none !important; }
             
             body.print-certificate .certificate-wrapper { display: block !important; }
             body.print-certificate #marksheetDoc, body.print-certificate #bulkPrintZone { display: none !important; }
 
-            /* Exact Portrait A4 */
+            /* STRICT PORTRAIT A4 SAFE AREA (190x275mm) */
             .marksheet { 
                 page: marksheet-page; 
-                width: 210mm !important; 
-                height: 296mm !important; /* Fixed exact height to prevent overflow to next page */
+                width: 190mm !important; 
+                height: 275mm !important; 
                 max-width: none !important; 
                 box-shadow: none !important; 
                 border: none !important; 
@@ -339,27 +338,37 @@
                 margin: 0 auto !important;
                 page-break-after: always; 
                 box-sizing: border-box !important;
+                overflow: hidden !important;
             }
             .total-score-box { background: #eef2ff !important; border: 2px solid #818cf8 !important; }
             .signatures-area { flex-direction: row !important; align-items: flex-end !important; justify-content: space-between !important; }
             
-            /* Exact Landscape A4 - Single Cert */
+            /* STRICT LANDSCAPE A4 SAFE AREA (277x190mm) */
             .certificate { 
                 page: cert-page; 
-                width: 297mm !important;
-                height: 209mm !important; /* Using 209mm instead of 210mm ensures it won't trigger an empty page */
+                width: 277mm !important;
+                height: 190mm !important;
                 max-width: none !important; 
                 box-shadow: none !important; 
-                padding: 10mm !important; /* Controls external margin on page */
+                padding: 5mm !important; 
                 margin: 0 auto !important;
                 page-break-after: always;
                 box-sizing: border-box !important;
+                overflow: hidden !important;
             }
             .cert-border-outer { border-radius: 0 !important; height: 100% !important; min-height: 0 !important; padding: 6px !important; box-sizing: border-box !important;}
-            .cert-border-inner { border-radius: 0 !important; height: 100% !important; min-height: 0 !important; padding: 30px 40px !important; box-sizing: border-box !important;}
+            /* Reduced inner padding so items fit perfectly inside the smaller bounding box */
+            .cert-border-inner { border-radius: 0 !important; height: 100% !important; min-height: 0 !important; padding: 20px 30px !important; box-sizing: border-box !important;}
             .cert-footer-sigs { flex-direction: row !important; align-items: flex-end !important; justify-content: space-around !important; }
             .cert-seal-center { order: 0 !important; margin: 0 !important; }
             .cert-watermark { opacity: 0.05 !important; }
+
+            /* Slightly reduce font sizes just for print to fit smaller box */
+            .cert-name { font-size: 50px !important; margin-bottom: 5px !important;}
+            .cert-headings h1 { font-size: 38px !important; margin-top: 0 !important;}
+            .cert-headings h2 { margin-bottom: 20px !important;}
+            .cert-body { font-size: 16px !important; margin-bottom: 20px !important; }
+            .cert-rank strong { font-size: 28px !important; }
 
             /* Logic for Bulk Prints */
             body.print-bulk #printZone { display: none !important; }
@@ -367,15 +376,15 @@
             
             .bulk-cert-page {
                 page: cert-page;
-                width: 297mm !important;
-                height: 209mm !important;
+                width: 277mm !important;
+                height: 190mm !important;
                 margin: 0 auto !important; 
-                padding: 10mm !important;
+                padding: 5mm !important;
                 page-break-after: always;
                 break-after: page;
                 box-sizing: border-box !important;
+                overflow: hidden !important;
             }
-            /* Remove break from last element to prevent blank trailing page */
             .bulk-cert-page:last-child { page-break-after: auto !important; break-after: auto !important; }
         }
     </style>
@@ -722,7 +731,7 @@
                 const injectedStyle = document.getElementById('dynamic-print-style');
                 if (injectedStyle) injectedStyle.remove();
                 bulkZone.innerHTML = ''; // Memory clear
-            }, 500); // 500ms delay to ensure all 50+ nodes render properly before print dialog opens
+            }, 500); // 500ms delay to ensure all nodes render properly before print dialog opens
         }
 
         function triggerConfetti() {
